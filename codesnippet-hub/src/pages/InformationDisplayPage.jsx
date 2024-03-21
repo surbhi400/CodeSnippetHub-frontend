@@ -32,7 +32,17 @@ const InformationDisplayPage = () => {
       console.error("Error fetching data:", error);
     }
   };
+  useEffect(() => {
+    fetchData();
+  }, []);
 
+  const handleSearch = (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    const filteredData = data.filter((item) =>
+      item.name.toLowerCase().includes(searchTerm)
+    );
+    setData(filteredData);
+  };
   const filteredData = data.filter((item) =>
     Object.values(item).some((value) =>
       value.toString().toLowerCase().includes(searchTerm.toLowerCase())
@@ -62,11 +72,13 @@ const InformationDisplayPage = () => {
         >
           <Input
             type="text"
-            placeholder="Search..."
+            placeholder="Search User..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             mb={4}
+            width="40%"
           />
+
           <Table variant="simple">
             <Thead>
               <Tr>

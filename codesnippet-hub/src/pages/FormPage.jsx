@@ -10,7 +10,9 @@ import {
   Select,
 } from "@chakra-ui/react";
 import { useToast } from "@chakra-ui/toast";
+import { useNavigate } from "react-router-dom";
 const FormPage = () => {
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [preferredLanguage, setPreferredLanguage] = useState("");
   const [standardInput, setStandardInput] = useState("");
@@ -71,6 +73,7 @@ const FormPage = () => {
         setPreferredLanguage("");
         setStandardInput("");
         setSourceCode("");
+        navigate("/info");
       } else {
         console.error("Failed to submit form data");
       }
