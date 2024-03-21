@@ -6,105 +6,146 @@ import {
   Input,
   Container,
   Button,
+  Text,
+  Select,
 } from '@chakra-ui/react';
-import { Controlled as CodeMirror } from 'react-codemirror2';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/material.css';
-import 'codemirror/mode/javascript/javascript';
-import { VscCode } from 'react-icons/vsc';
-import { RiFileUploadFill } from 'react-icons/ri';
-
+// import { VscCode } from 'react-icons/vsc';
+// import { RiFileUploadFill } from 'react-icons/ri';
+import { useToast } from '@chakra-ui/toast';
 const FormPage = () => {
+  const [name, setName] = useState('');
+  const [preferredLanguage, setPreferredLanguage] = useState('');
+  const [standardInput, setStandardInput] = useState(''); 
   const [sourceCode, setSourceCode] = useState('');
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [activeSection, setActiveSection] = useState();
+    const [nameError, setNameError] = useState('');
+  const [languageError, setLanguageError] = useState('');
+  const [sourceCodeError, setSourceCodeError] = useState('');
 
-  const handleCodeChange = (editor, data, value) => {
-    setSourceCode(value);
-  };
+  const toast = useToast()
+ 
+ const handleSubmit = async (event) => {
+  event.preventDefault();
 
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
-  };
+  try {
+    const response = await fetch('http://localhost:5000/api/submit-form', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name,
+        preferredLanguage,
+        standardInput,
+        sourceCode,
+      }),
+    });
 
-  const handleLogoClick = (section) => {
-    setActiveSection(section);
-  };
+   if (!name) {
+      setNameError('Name is required');
+      return;
+    } else {
+      setNameError('');
+    }
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    console.log('Submitted:', { sourceCode, selectedFile });
-  };
+    if (!preferredLanguage) {
+      setLanguageError('Language is required');
+      return;
+    } else {
+      setLanguageError('');
+    }
+
+    if (!sourceCode) {
+      setSourceCodeError('Source Code is required');
+      return;
+    } else {
+      setSourceCodeError('');
+    }
+    if (response.ok) {
+      // console.log('Form data submitted successfully');
+       toast({
+      title: "Submission Successful",
+      status: "success",
+      duration: 5000,
+      isClosable: true,
+      position: "bottom",
+    });
+    setName('');
+      setPreferredLanguage('');
+      setStandardInput('');
+      setSourceCode('');
+    } else {
+      console.error('Failed to submit form data');
+    }
+  } catch (error) {
+    console.error('Error submitting form data:', error);
+  }
+};
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Container maxW="xl" centerContent position="relative" top="50px">
+    <div style={{backgroundColor: 'rgb(245,249,252)', height:'100vh', fontFamily:'sans-serif'}}>
+      <Container maxW="xl" centerContent position="relative" top="30px">
+       
         <Box
-          p={7}
-          bg="white"
+          p={5}
+          bg="rgb(245,249,252)"
           w="100%"
           borderRadius="lg"
           borderWidth="3px"
           shadow="md"
         >
-          <FormControl mb={4}>
+          <h2 style={{textAlign:'center', fontSize:'20px', marginBottom:'4px'}}> Submit your code</h2>
+          <hr style={{marginBottom:'10px'}}/>
+            <form onSubmit={handleSubmit}>
+               
+          <FormControl mb={4} >
             <FormLabel>Username</FormLabel>
-            <Input type="text" placeholder="Ex: John Doe" />
+            <Input bg='white' type="text" placeholder="Ex: John Doe" value={name} onChange={(e) => setName(e.target.value)}  />
+          <Text fontSize='13px' color="red">{nameError}</Text>
           </FormControl>
-
-          <FormControl mb={4}>
-            <FormLabel>Preferred Code Language</FormLabel>
-            <Input type="text" placeholder="Ex: C++, Java, ..." />
+         
+         <FormControl mb={4} >
+            <FormLabel>Language</FormLabel>
+        <Select  bg='white' value={preferredLanguage} onChange={(e) => setPreferredLanguage(e.target.value)}>
+          <option value='C++'>C++</option>
+          <option value='Java'>Java</option>
+          <option value='JavaScript'>JavaScript</option>
+         <option value='Python'>Python</option>
+           </Select>
+           <Text fontSize='13px' color="red">{languageError}</Text>
           </FormControl>
-
-          <FormControl mb={4}>
-            <FormLabel>Standard Input</FormLabel>
-            <Input type="text" placeholder="stdin" />
-          </FormControl>
-
-          <FormControl>
-            <FormLabel>Upload via</FormLabel>
-            <Box align="center" display="flex" justifyContent="space-evenly" mb={4}>
-            <VscCode
-              style={{ cursor: 'pointer', width: '25px', height: '25px' }}
-              onClick={() => handleLogoClick('editor')}
-            />
-            <RiFileUploadFill
-              style={{ cursor: 'pointer', width: '25px', height: '25px' }}
-              onClick={() => handleLogoClick('fileUpload')}
-            />
-            </Box>
         
-        </FormControl>
-          {activeSection === 'editor' && (
-            <FormControl mb={4}>
-              <FormLabel>Upload Source Code</FormLabel>
-              <CodeMirror
-                value={sourceCode}
-                options={{
-                  mode: 'javascript',
-                  theme: 'material',
-                  lineNumbers: true,
-                }}
-                onBeforeChange={handleCodeChange}
-              />
-            </FormControl>
-          )}
-
-          {activeSection === 'fileUpload' && (
-            <FormControl mb={4}>
-              <FormLabel>Upload Source Code File</FormLabel>
-              <Input  type="file" accept=".js,.py,.java" onChange={handleFileChange} />
-            </FormControl>
-          )}
-            <Box align="center">
-            <Button width="50%" type="submit" colorScheme="blue">
+          <FormControl mb={4}>
+            <FormLabel>Input</FormLabel>
+            <Input type="text" bg='white' value={standardInput} onChange={(e) => setStandardInput(e.target.value)}/>
+          </FormControl>
+          <FormControl mb={4}>
+           <FormLabel>Source Code</FormLabel>
+         <textarea 
+           value={sourceCode}
+           onChange={(e) => setSourceCode(e.target.value)}
+            placeholder="def sum(a, b):
+                         return a + b"
+            rows={5} 
+            cols={50}
+            style={{
+            border: '1px solid #ccc',
+            borderRadius: '4px', 
+            padding: '8px', 
+            width: '100%', 
+        }} 
+      
+      />
+        <Text fontSize='13px' color="red">{sourceCodeError}</Text>
+     </FormControl>
+            <Box align="right" mt='20px'>
+            <Button type="submit" colorScheme="green" onClick={handleSubmit}>
               Submit
             </Button>
           </Box>   
+          </form>
         </Box>
       </Container>
-    </form>
+    </div>
   );
 };
 
