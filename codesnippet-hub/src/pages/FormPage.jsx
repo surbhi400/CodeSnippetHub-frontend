@@ -48,20 +48,22 @@ const FormPage = () => {
         setSourceCodeError("");
       }
 
-      const response = await fetch("http://localhost:5000/api/submit-form", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          preferredLanguage,
-          standardInput,
-          sourceCode,
-        }),
-      });
+      const response = await fetch(
+        "https://codesnippethub-backend.onrender.com/api/submit-form",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            preferredLanguage,
+            standardInput,
+            sourceCode,
+          }),
+        }
+      );
       if (response.ok) {
-        // console.log('Form data submitted successfully');
         toast({
           title: "Submission Successful",
           status: "success",
@@ -86,7 +88,6 @@ const FormPage = () => {
     <>
       <div
         style={{
-          // backgroundColor: "rgb(245,249,252)",
           height: "100vh",
           fontFamily: "sans-serif",
           marginTop: "4rem",
